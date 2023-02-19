@@ -102,22 +102,28 @@ class _MyHomePageState extends State<MyHomePage> {
     final password = passwordController.text;
     print(username);
     print(password);
+    // String url = 'https://uprintbd.com/mobileLogin';
+    String url = 'http://192.168.0.110:5000/mobileLogin';
     final response = await http.post(
-      Uri.parse('http://192.168.0.110:5000/mobileLogin'),
+      Uri.parse(url),
       body: {'username': username, 'password': passwordController.text},
     );
     print(response.statusCode);
     if (response.statusCode == 200) {
       // print()
       final data = json.decode(response.body);
+      final accessToken = data['access_token'];
+
       if (data['success']) {
         // Navigate to home screen
         // ignore: use_build_context_synchronously
-        Navigator.push(context, MaterialPageRoute(builder: (context) => UserDashboard(username)),);
+        Navigator.push(context, MaterialPageRoute(builder: (context) => UserDashboard(username,accessToken)),);
       }
       else {
 
       }
+      print(accessToken);
+      return accessToken;
     } else {
       print("error");
       showDialog(
