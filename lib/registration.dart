@@ -19,14 +19,19 @@ class _RegistrationPageState extends State<RegistrationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Registration'),
-      ),
+      // appBar: AppBar(
+      //   title: Text('Registration'),
+      // ),
       body: Container(
-        padding: EdgeInsets.symmetric(horizontal: 20),
+        padding: EdgeInsets.symmetric(horizontal: 40),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            Text(
+              "Register Now!!",
+              style: TextStyle(fontSize: 45, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 50,),
             TextField(
               controller: usernameController,
               decoration: InputDecoration(
@@ -70,6 +75,28 @@ class _RegistrationPageState extends State<RegistrationPage> {
             ElevatedButton(
               onPressed: registration,
               child: Text('Register'),
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black,
+                  padding: EdgeInsets.symmetric(horizontal: 60, vertical: 18),
+                  textStyle: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold
+                  )
+              ),
+            ),
+            SizedBox(height: 20,),
+            Text("or,",style: TextStyle(fontSize: 20),),
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => MyHomePage(title: "demo")),
+                );
+              },
+              child: Text('Already have an account?',style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15
+              ),),
             ),
           ],
         ),

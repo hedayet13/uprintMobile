@@ -13,7 +13,8 @@ class UserDashboard extends StatefulWidget {
   // UserDashboard( {Key? key, required this.email}) : super(key: key);
   UserDashboard(this.username, this.accessToken);
   @override
-  State<UserDashboard> createState() => _UserDashboardState(this.username,this.accessToken);
+  State<UserDashboard> createState() =>
+      _UserDashboardState(this.username, this.accessToken);
 }
 
 class _UserDashboardState extends State<UserDashboard> {
@@ -22,6 +23,7 @@ class _UserDashboardState extends State<UserDashboard> {
   _UserDashboardState(this.username, this.accessToken);
   bool _isLoggedIn = false;
   List<Post> _posts = [];
+
 
   // String email => email;
 
@@ -60,17 +62,21 @@ class _UserDashboardState extends State<UserDashboard> {
     var headers = {
       'Authorization': 'Bearer $accessToken',
     };
-    final response = await http.get(
-        Uri.parse( url ),headers: headers);
+    final response = await http.get(Uri.parse(url), headers: headers);
     if (response.statusCode == 200) {
       final jsonData = json.decode(response.body);
-      print(jsonData);
+      // print(jsonData);
       setState(() {
         _posts = List<Post>.from(jsonData.map((post) => Post.fromJson(post)));
       });
     } else {
       throw Exception('Failed to fetch posts from serer');
     }
+  }
+
+  Future<void> _refresh() async {
+    // Call the _fetchData() method to reload data from the server
+    await _fetchPosts();
   }
 
   @override
@@ -86,45 +92,69 @@ class _UserDashboardState extends State<UserDashboard> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed:(){
+        onPressed: () {
           print(accessToken);
-          Navigator.push(context, MaterialPageRoute(builder: (context)=>UploadFile(accessToken)));},
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => UploadFile(accessToken)));
+        },
         label: const Text("Upload PDF"),
         icon: const Icon(Icons.picture_as_pdf_sharp),
         backgroundColor: Colors.pink,
       ),
-      body: _posts.isEmpty
-          ? Center(child: CircularProgressIndicator())
-          : Column(
+      body: RefreshIndicator(
+        onRefresh: _refresh,
+        child: _posts.isEmpty
+            ? ListView(
+          children: [
+            Center(child: Text("No Print Queue")),
+          ],
+        )
+            : Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Text('Previous Print Requests'),
-                    Text('Cost'),
-                    Text("Printing Status"),
-                    Text('OTP'),
-                  ],
-                ),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: _posts.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      final post = _posts[index];
-                      return Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(post.file_name),
-                          Text(post.cost),
-                          Text(post.print_status),
-                          Text(post.otpNumber),
-                        ],
-                      );
-                    },
-                  ),
-                ),
+                Text('Previous Print Requests'),
+                Text('Cost'),
+                Text("Printing Status"),
+                Text('OTP'),
               ],
             ),
+            Expanded(
+              child: ListView.builder(
+                itemCount: _posts.length,
+                itemBuilder: (BuildContext context, int index) {
+                  final post = _posts[index];
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(post.file_name),
+                      Text(post.cost),
+                      Text(post.print_status),
+                      Text(post.otpNumber),
+                    ],
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profile',
+          ),
+        ],
+        // currentIndex: _selectedIndex,
+        selectedItemColor: Colors.blue,
+        // onTap: _onItemTapped,
+      ),
     );
   }
 }

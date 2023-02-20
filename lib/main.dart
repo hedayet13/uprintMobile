@@ -1,10 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:uprint/dashboard.dart';
 import 'package:uprint/registration.dart';
 import 'package:http/http.dart' as http;
 import 'package:uprint/userDashboard.dart';
-
 
 void main() {
   runApp(const MyApp());
@@ -35,8 +35,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-
-
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
 
@@ -52,14 +50,19 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Login'),
-      ),
+      // appBar: AppBar(
+      //   title: Text('Login'),
+      // ),
       body: Container(
-        padding: EdgeInsets.symmetric(horizontal: 20),
+        padding: EdgeInsets.symmetric(horizontal: 50),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            Text(
+              "Welcome to Uprint",
+              style: TextStyle(fontSize: 45, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 50,),
             TextField(
               controller: usernameController,
               decoration: const InputDecoration(
@@ -80,9 +83,20 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             SizedBox(height: 20),
             ElevatedButton(
-              onPressed:login,
+              onPressed: login,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.black,
+                padding: EdgeInsets.symmetric(horizontal: 60, vertical: 18),
+                textStyle: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold
+                )
+              ),
               child: Text('Login'),
+
             ),
+            SizedBox(height: 20,),
+            Text("or,",style: TextStyle(fontSize: 20),),
             TextButton(
               onPressed: () {
                 Navigator.push(
@@ -90,13 +104,17 @@ class _MyHomePageState extends State<MyHomePage> {
                   MaterialPageRoute(builder: (context) => RegistrationPage()),
                 );
               },
-              child: Text('Create an account'),
+              child: Text('Create an account',style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 15
+              ),),
             ),
           ],
         ),
       ),
     );
   }
+
   void login() async {
     final username = usernameController.text;
     final password = passwordController.text;
@@ -117,11 +135,12 @@ class _MyHomePageState extends State<MyHomePage> {
       if (data['success']) {
         // Navigate to home screen
         // ignore: use_build_context_synchronously
-        Navigator.push(context, MaterialPageRoute(builder: (context) => UserDashboard(username,accessToken)),);
-      }
-      else {
-
-      }
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => Dashboard(username, accessToken)),
+        );
+      } else {}
       print(accessToken);
       return accessToken;
     } else {
@@ -147,5 +166,3 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 }
-
-

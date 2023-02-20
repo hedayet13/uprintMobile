@@ -48,6 +48,7 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^2.0.0
   file_picker:
+  google_nav_bar: ^5.0.6
   http:
   shared_preferences:
 
