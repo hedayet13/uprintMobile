@@ -62,47 +62,26 @@ class _UploadFileState extends State<UploadFile> {
     }
 
   }
+
+
+
+
   Future<void> _uploadFile() async {
-    // if (file == null) return;
+    if (file == null) return;
+    print(file!.path);
     print(accessToken);
-    // print(file!.path);
-    // final filepath = await http.MultipartFile.fromPath('file', file!.path);
-    var headers = {
-      'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTY3NjgyOTM3MiwianRpIjoiMDliMjkyNWUtOWJmMi00MWJiLTk3NjEtZWY0NGM4NTFiYjVhIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6ImFkbWluIiwibmJmIjoxNjc2ODI5MzcyLCJleHAiOjE2NzY4MzAyNzJ9.kyTmcgnerQzo3KpkcyvyoXBX1MT2ufPJUnW_mQDxUOo',
-      'Content-Type': 'application/json'
-    };
-    var request = http.Request('POST', Uri.parse('http://127.0.0.1:5000/protected'));
-    request.body = json.encode({
-      "data": "Text"
-    });
-    request.headers.addAll(headers);
-
-    http.StreamedResponse response = await request.send();
-
+    final url = 'http://192.168.0.110:5000/mobileUploader';
+    final request = http.MultipartRequest('POST', Uri.parse(url));
+    request.headers['Authorization'] = 'Bearer $accessToken';
+    request.files.add(await http.MultipartFile.fromPath('file', file!.path));
+    final response = await request.send();
+    print(response.statusCode);
     if (response.statusCode == 200) {
-      print(await response.stream.bytesToString());
-    }
-    else {
-      print(response.reasonPhrase);
+      print('File Uploaded');
+    } else {
+      print('Error uploading file');
     }
   }
-  //
-  // Future<void> _uploadFile() async {
-  //   if (file == null) return;
-  //   print(file!.path);
-  //   print(accessToken);
-  //   final url = 'http://192.168.0.110:5000/uploader';
-  //   final request = http.MultipartRequest('POST', Uri.parse(url));
-  //   request.headers['Authorization'] = 'Bearer $accessToken';
-  //   request.files.add(await http.MultipartFile.fromPath('pdf', file!.path));
-  //   final response = await request.send();
-  //   print(response.statusCode);
-  //   if (response.statusCode == 200) {
-  //     print('File Uploaded');
-  //   } else {
-  //     print('Error uploading file');
-  //   }
-  // }
 
 
 }

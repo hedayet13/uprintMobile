@@ -55,11 +55,13 @@ class _UserDashboardState extends State<UserDashboard> {
 
   Future<void> _fetchPosts() async {
     print(username);
-
     // String url = 'https://uprintbd.com/mobileUserDashboard/';
-    String url = 'http://192.168.0.110:5000/mobileUserDashboard/';
+    String url = 'http://192.168.0.110:5000/mobileUserDashboard';
+    var headers = {
+      'Authorization': 'Bearer $accessToken',
+    };
     final response = await http.get(
-        Uri.parse( url + username));
+        Uri.parse( url ),headers: headers);
     if (response.statusCode == 200) {
       final jsonData = json.decode(response.body);
       print(jsonData);
