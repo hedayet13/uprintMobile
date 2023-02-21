@@ -48,7 +48,10 @@ class _MyHomePageState extends State<MyHomePage> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
+  bool isloading = false;
   Widget build(BuildContext context) {
+
+
     return Scaffold(
       // appBar: AppBar(
       //   title: Text('Login'),
@@ -59,7 +62,7 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              "Welcome to Uprint",
+              "Welcome to uPrint",
               style: TextStyle(fontSize: 45, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 50,),
@@ -82,18 +85,38 @@ class _MyHomePageState extends State<MyHomePage> {
               obscureText: true,
             ),
             SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: login,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black,
-                padding: EdgeInsets.symmetric(horizontal: 60, vertical: 18),
-                textStyle: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold
-                )
-              ),
-              child: Text('Login'),
+            Container(
+              padding: EdgeInsets.only(left:60,right: 60),
+              height: 60,
+              width: MediaQuery.of(context).size.width,
+              child: ElevatedButton(
 
+                onPressed: (){
+                  setState(() {
+                    isloading =true;
+                  });
+                  login();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black,
+                  // padding: EdgeInsets.symmetric(horizontal: 60, vertical: 18),
+                  textStyle: TextStyle(
+                    fontSize:20,
+                    fontWeight: FontWeight.bold
+                  )
+                ),
+                child: isloading? Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Transform.scale(scaleX:0.5, scaleY:0.8,child:CircularProgressIndicator(color: Colors.red,)),
+                    CircularProgressIndicator(color: Colors.pinkAccent,),
+                    Text("   logging in",style: TextStyle(
+                      color: Colors.pink
+                    ),)
+                  ],
+                ) : Text('Login'),
+
+              ),
             ),
             SizedBox(height: 20,),
             Text("or,",style: TextStyle(fontSize: 20),),
@@ -120,8 +143,8 @@ class _MyHomePageState extends State<MyHomePage> {
     final password = passwordController.text;
     print(username);
     print(password);
-    // String url = 'https://uprintbd.com/mobileLogin';
-    String url = 'http://192.168.0.110:5000/mobileLogin';
+    String url = 'https://www.uprintbd.com/mobileLogin';
+    // String url = 'http://192.168.0.110:5000/mobileLogin';
     final response = await http.post(
       Uri.parse(url),
       body: {'username': username, 'password': passwordController.text},
@@ -144,6 +167,9 @@ class _MyHomePageState extends State<MyHomePage> {
       print(accessToken);
       return accessToken;
     } else {
+      setState(() {
+        isloading =false;
+      });
       print("error");
       showDialog(
         context: context,

@@ -16,6 +16,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirm_passwordController = TextEditingController();
 
+  bool isLoadingRegistration =false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -54,17 +55,17 @@ class _RegistrationPageState extends State<RegistrationPage> {
             SizedBox(height: 20),
             TextField(
               controller: passwordController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Password',
                 hintText: 'Enter your password',
                 border: OutlineInputBorder(),
               ),
               obscureText: true,
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             TextField(
               controller: confirm_passwordController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Confirm Password',
                 hintText: 'Confirm your password',
                 border: OutlineInputBorder(),
@@ -72,28 +73,49 @@ class _RegistrationPageState extends State<RegistrationPage> {
               obscureText: true,
             ),
             SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: registration,
-              child: Text('Register'),
-              style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black,
-                  padding: EdgeInsets.symmetric(horizontal: 60, vertical: 18),
-                  textStyle: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold
-                  )
+            Container(
+              padding: EdgeInsets.only(left: 60,right: 60),
+              height:60,
+              width: MediaQuery.of(context).size.width,
+
+              child: ElevatedButton(
+                onPressed: (){
+                  setState(() {
+                    isLoadingRegistration = true;
+                  });
+                  registration();
+
+                },
+                child: isLoadingRegistration? Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(color: Colors.green,),
+                    Text("   prograssing",style: TextStyle(
+                      color: Colors.green
+                    ),)
+                  ],
+                ): Text('Register'),
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+
+                    // padding: EdgeInsets.symmetric(horizontal: 60, vertical: 18),
+                    textStyle: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold
+                    )
+                ),
               ),
             ),
-            SizedBox(height: 20,),
-            Text("or,",style: TextStyle(fontSize: 20),),
+            const SizedBox(height: 20,),
+            const Text("or,",style: TextStyle(fontSize: 20),),
             TextButton(
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => MyHomePage(title: "demo")),
+                  MaterialPageRoute(builder: (context) =>const MyHomePage(title: "demo")),
                 );
               },
-              child: Text('Already have an account?',style: TextStyle(
+              child: const Text('Already have an account?',style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 15
               ),),
@@ -117,8 +139,9 @@ class _RegistrationPageState extends State<RegistrationPage> {
       print(password);
       print(phone_number);
       // print(confirm_password);
+
       final response = await http.post(
-        Uri.parse('http://192.168.0.110:5000/mobileRegistration'),
+        Uri.parse('https://www.uprintbd.com/mobileRegistration'),
         body: {'username': username,'phone_number':phone_number, 'password': password},
       );
       print(response.statusCode);
@@ -135,6 +158,9 @@ class _RegistrationPageState extends State<RegistrationPage> {
 
         }
       } else {
+        setState(() {
+          isLoadingRegistration = false;
+        });
         print("error");
         showDialog(
           context: context,
