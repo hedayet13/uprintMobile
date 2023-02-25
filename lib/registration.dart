@@ -16,6 +16,9 @@ class _RegistrationPageState extends State<RegistrationPage> {
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirm_passwordController = TextEditingController();
 
+  bool showRegistrationPassword = false;
+  bool showRegistrationConfirmPassword = false;
+
   bool isLoadingRegistration =false;
   @override
   Widget build(BuildContext context) {
@@ -55,22 +58,36 @@ class _RegistrationPageState extends State<RegistrationPage> {
             SizedBox(height: 20),
             TextField(
               controller: passwordController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Password',
                 hintText: 'Enter your password',
                 border: OutlineInputBorder(),
+                suffixIcon: IconButton(
+              icon: showRegistrationPassword ? Icon(Icons.visibility) : Icon(Icons.visibility_off),
+        onPressed: () {
+          setState(() {
+            showRegistrationPassword = !showRegistrationPassword;
+          });
+        },
+      ),
               ),
-              obscureText: true,
+              obscureText: !showRegistrationPassword,
             ),
             const SizedBox(height: 20),
             TextField(
               controller: confirm_passwordController,
-              decoration: const InputDecoration(
+              decoration:  InputDecoration(
                 labelText: 'Confirm Password',
                 hintText: 'Confirm your password',
                 border: OutlineInputBorder(),
+                suffixIcon: IconButton(
+                  icon: showRegistrationConfirmPassword ? Icon(Icons.visibility):Icon(Icons.visibility_off),
+                  onPressed: ()=> setState(() {
+                    showRegistrationConfirmPassword= !showRegistrationConfirmPassword;
+                  }),
+                )
               ),
-              obscureText: true,
+              obscureText: !showRegistrationConfirmPassword,
             ),
             SizedBox(height: 20),
             Container(
@@ -187,7 +204,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
         builder: (BuildContext context) {
           return AlertDialog(
             title: Text('Incorrect Password'),
-            content: Text('Please Provide a valid password.'),
+            content: Text('Please check your confirmed   password.'),
             actions: [
               TextButton(
                 onPressed: () {
@@ -199,6 +216,10 @@ class _RegistrationPageState extends State<RegistrationPage> {
           );
         },
       );
+      setState(() {
+        isLoadingRegistration = false;
+      });
+
     }
 
 

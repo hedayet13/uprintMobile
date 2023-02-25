@@ -26,6 +26,7 @@ class _DashboardState extends State<Dashboard> {
   final TextEditingController phoneNumberController = TextEditingController();
   final TextEditingController amountController = TextEditingController();
   final TextEditingController trxIDController = TextEditingController();
+  final TextEditingController feedbackController = TextEditingController();
 
   _DashboardState(this.username, this.accessToken);
   bool _isLoggedIn = false;
@@ -112,18 +113,29 @@ class _DashboardState extends State<Dashboard> {
       'Authorization': 'Bearer $accessToken',
     };
     final response = await http.get(Uri.parse(url), headers: headers);
+    print(response.statusCode);
     if (response.statusCode == 200) {
       final jsonData = json.decode(response.body);
       // print(jsonData);
       setState(() {
         var requests = jsonDecode((response.body));
         _previousRequests = requests[0];
+        print(_previousRequests);
+        if (_previousRequests == []){
+          _previousRequests = [{'file_name': "null"},{'cost': 0.0},{"otp_number":"none"}];
+        }
         // var balance = jsonData((response.body[1]));
         // print(balance);
         balance = requests[1][0]['balance'];
-        email = requests[1][0]['email'];
+        try{
+          email = requests[1][0]['email'];
+        }
+        catch (e){
+          email = "not provided";
+        }
+
         phone_number = requests[1][0]['phone_number'];
-        print(_previousRequests[0]);
+        print(_previousRequests);
         print(balance);
         print(email);
         print(phone_number);
@@ -132,6 +144,7 @@ class _DashboardState extends State<Dashboard> {
     } else {
       throw Exception('Failed to fetch posts from serer');
     }
+
   }
 
   Future<void> _refresh() async {
@@ -183,68 +196,81 @@ class _DashboardState extends State<Dashboard> {
               Container(
                 padding: EdgeInsets.fromLTRB(10, 10, 10, 50),
                 color: Colors.white,
-                child: _previousRequests.isEmpty
-                    ? CircularProgressIndicator()
-                    : Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Container(
-                            height: 40,
-                            width: 250,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              color: Colors.white,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withOpacity(0.5),
-                                  spreadRadius: 5,
-                                  blurRadius: 7,
-                                  offset: Offset(0, 3),
-                                ),
-                              ],
-                            ),
-                            child: Center(
-                              child: Text(
-                                "Reamining Print Queue",
-                                style: TextStyle(
-                                    fontSize: 25, fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Expanded(
-                            child: RefreshIndicator(
-                              onRefresh: _refresh,
-                              child: SingleChildScrollView(
-                                physics: AlwaysScrollableScrollPhysics(),
-                                child: DataTable(
-                                  headingRowColor: MaterialStateProperty.resolveWith(
-                                          (states) => Colors.black26
-                                  ),
-                                  // columnSpacing: 1,
-                                  columns: [
-                                    DataColumn(label: Text('Print Requests')),
-                                    // DataColumn(label: Text('Status')),
-                                    DataColumn(label: Text('Cost')),
-                                    DataColumn(label: Text('OTP')),
+                child: RefreshIndicator(
+                  onRefresh: _refresh,
+                  child: Center(
+                    child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Container(
+                                height: 40,
+                                width: 250,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10),
+                                  color: Colors.white,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.grey.withOpacity(0.5),
+                                      spreadRadius: 5,
+                                      blurRadius: 7,
+                                      offset: Offset(0, 3),
+                                    ),
                                   ],
-                                  rows: _previousRequests.map((request) {
-                                    print(request['printing_status']);
-                                    return DataRow(cells: [
-                                      DataCell(Text('${request['file_name']}')),
-                                      DataCell(Text('${request['cost']}')),
-                                      // DataCell(Text('${request['printing_status']}')),
-                                      DataCell(Text('${request['otpNumber']}')),
-                                    ]);
-                                  }).toList(),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    "Reamining Print Queue",
+                                    style: TextStyle(
+                                        fontSize: 25, fontWeight: FontWeight.bold),
+                                  ),
                                 ),
                               ),
-                            ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              Container(
+                                child: _previousRequests.isEmpty
+                                    ?FutureBuilder(
+                                  future: Future.delayed(Duration(seconds: 3)),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState == ConnectionState.waiting) {
+                                      return CircularProgressIndicator();
+                                    } else {
+                                      return ElevatedButton(onPressed: _refresh, child: Text("Refresh"),style: ElevatedButton.styleFrom(backgroundColor: Colors.blueGrey),);
+                                    }
+                                  },
+                                )
+                                    :Expanded(
+                                  child: SingleChildScrollView(
+                                    physics: AlwaysScrollableScrollPhysics(),
+                                    child: DataTable(
+                                      headingRowColor: MaterialStateProperty.resolveWith(
+                                              (states) => Colors.black26
+                                      ),
+                                      // columnSpacing: 1,
+                                      columns: [
+                                        DataColumn(label: Text('Print Requests')),
+                                        // DataColumn(label: Text('Status')),
+                                        DataColumn(label: Text('Cost')),
+                                        DataColumn(label: Text('OTP')),
+                                      ],
+                                      rows: _previousRequests.map((request) {
+                                        print(request['printing_status']);
+                                        return DataRow(cells: [
+                                          DataCell(Text('${request['file_name']}')),
+                                          DataCell(Text('${request['cost']}')),
+                                          // DataCell(Text('${request['printing_status']}')),
+                                          DataCell(Text('${request['otpNumber']}')),
+                                        ]);
+                                      }).toList(),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                  ),
+                ),
               ),
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
@@ -411,6 +437,7 @@ class _DashboardState extends State<Dashboard> {
                             TextSpan(
                               text:
                                   "and fill the form and click the 'Submit' button. Your account balance will be updated within a few minutes. Thank you for choosing our service and enjoy!",
+
                             ),
                           ],
                         ),
@@ -465,6 +492,42 @@ class _DashboardState extends State<Dashboard> {
                     ],
                   ),
                 ),
+              ),
+              Container(
+                padding: EdgeInsets.only(left: 20,right: 20),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text("Submit your comments, feedbaack or any suggestions about the device",style:
+                      TextStyle(fontSize: 35, fontWeight: FontWeight.bold),),
+                      SizedBox(height: 20),
+                      TextField(
+                        controller: feedbackController,
+                        maxLines: 6,
+                        minLines: 4,
+                        // maxLength: 10,
+                        decoration: const InputDecoration(
+                          labelText: 'Comments',
+                          hintText: 'Leave your comment here',
+                          border: OutlineInputBorder(),
+                        ),
+                        obscureText: false,
+                      ),
+                      SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: submitFeedback,
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.black,
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 60, vertical: 18),
+                            textStyle: TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.bold)),
+                        child: Text('Submit'),
+                      ),
+                    ],
+                  ),
+                ),
               )
             ],
           ),
@@ -495,7 +558,8 @@ class _DashboardState extends State<Dashboard> {
                 GButton(
                   icon: Icons.monetization_on_sharp,
                   text: "Transaction",
-                )
+                ),
+                GButton(icon: Icons.feedback,text: "Feedback",)
               ],
             ),
           ),
@@ -503,6 +567,40 @@ class _DashboardState extends State<Dashboard> {
       ),
     );
   }
+  void submitFeedback() async{
+    final feedback = feedbackController.text;
+    // String url = "http://192.168.0.110:5000/mobileFeedback";
+    String url = 'https://www.uprintbd.com/mobileFeedback';
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {'Authorization': "Bearer $accessToken"},
+      body: {'feedback': feedback},
+    );
+    print(response.statusCode);
+    if (response.statusCode==200){
+      return showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Your feedback has been submitted'),
+            content: Text('We appreciate your advice. Your feedback is valuable to us and will help us continue improving our product.'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(Colors.green),
+                ),
+                child: Text('OK',style: TextStyle(color: Colors.white),),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
+
   void submitTransaction() async{
     final phone_number = phoneNumberController.text;
     final amount = amountController.text;

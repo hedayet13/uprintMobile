@@ -48,10 +48,9 @@ class _MyHomePageState extends State<MyHomePage> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
+  bool _showPassword = false;
   bool isloading = false;
   Widget build(BuildContext context) {
-
-
     return Scaffold(
       // appBar: AppBar(
       //   title: Text('Login'),
@@ -65,7 +64,9 @@ class _MyHomePageState extends State<MyHomePage> {
               "Welcome to uPrint",
               style: TextStyle(fontSize: 45, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 50,),
+            SizedBox(
+              height: 50,
+            ),
             TextField(
               controller: usernameController,
               decoration: const InputDecoration(
@@ -76,50 +77,63 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             const SizedBox(height: 20),
             TextField(
+              obscureText: !_showPassword,
               controller: passwordController,
-              decoration: const InputDecoration(
-                labelText: 'Password',
-                hintText: 'Enter your password',
-                border: OutlineInputBorder(),
-              ),
-              obscureText: true,
+              decoration: InputDecoration(
+                  labelText: 'Password',
+                  hintText: 'Enter your password',
+                  border: OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                      onPressed: () {
+                        setState(() {
+                          _showPassword = !_showPassword;
+                        });
+                      },
+                      icon: _showPassword
+                          ? Icon(Icons.visibility_outlined)
+                          : Icon(Icons.visibility_off_outlined))),
             ),
             SizedBox(height: 20),
             Container(
-              padding: EdgeInsets.only(left:60,right: 60),
+              padding: EdgeInsets.only(left: 60, right: 60),
               height: 60,
               width: MediaQuery.of(context).size.width,
               child: ElevatedButton(
-
-                onPressed: (){
+                onPressed: () {
                   setState(() {
-                    isloading =true;
+                    isloading = true;
                   });
                   login();
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black,
-                  // padding: EdgeInsets.symmetric(horizontal: 60, vertical: 18),
-                  textStyle: TextStyle(
-                    fontSize:20,
-                    fontWeight: FontWeight.bold
-                  )
-                ),
-                child: isloading? Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // Transform.scale(scaleX:0.5, scaleY:0.8,child:CircularProgressIndicator(color: Colors.red,)),
-                    CircularProgressIndicator(color: Colors.pinkAccent,),
-                    Text("   logging in",style: TextStyle(
-                      color: Colors.pink
-                    ),)
-                  ],
-                ) : Text('Login'),
-
+                    backgroundColor: Colors.black,
+                    // padding: EdgeInsets.symmetric(horizontal: 60, vertical: 18),
+                    textStyle:
+                        TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                child: isloading
+                    ? Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // Transform.scale(scaleX:0.5, scaleY:0.8,child:CircularProgressIndicator(color: Colors.red,)),
+                          CircularProgressIndicator(
+                            color: Colors.pinkAccent,
+                          ),
+                          Text(
+                            "   logging in",
+                            style: TextStyle(color: Colors.pink),
+                          )
+                        ],
+                      )
+                    : Text('Login'),
               ),
             ),
-            SizedBox(height: 20,),
-            Text("or,",style: TextStyle(fontSize: 20),),
+            SizedBox(
+              height: 20,
+            ),
+            Text(
+              "or,",
+              style: TextStyle(fontSize: 20),
+            ),
             TextButton(
               onPressed: () {
                 Navigator.push(
@@ -127,10 +141,10 @@ class _MyHomePageState extends State<MyHomePage> {
                   MaterialPageRoute(builder: (context) => RegistrationPage()),
                 );
               },
-              child: Text('Create an account',style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 15
-              ),),
+              child: Text(
+                'Create an account',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+              ),
             ),
           ],
         ),
@@ -168,7 +182,7 @@ class _MyHomePageState extends State<MyHomePage> {
       return accessToken;
     } else {
       setState(() {
-        isloading =false;
+        isloading = false;
       });
       print("error");
       showDialog(
