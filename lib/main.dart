@@ -1,14 +1,28 @@
 import 'dart:convert';
-
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_messaging_platform_interface/firebase_messaging_platform_interface.dart';
+import 'package:uprint/notificationservice/local_notification_service.dart';
+import 'firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:uprint/dashboard.dart';
 import 'package:uprint/registration.dart';
 import 'package:http/http.dart' as http;
 import 'package:uprint/userDashboard.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-void main() {
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  // FirebaseMessaging.onBackgroundMessage(_onBackgroundMessage);
+  LocalNotificationService.initialize();
   runApp(const MyApp());
 }
+
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -16,6 +30,7 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
@@ -37,7 +52,6 @@ class MyApp extends StatelessWidget {
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
-
   final String title;
 
   @override
@@ -47,10 +61,78 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-
   bool _showPassword = false;
   bool isloading = false;
+  String deviceTokenToSendPushNotification = "";
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    checkLogin();
+
+    FirebaseMessaging.instance.getInitialMessage().then(
+          (message) {
+        print("FirebaseMessaging.instance.getInitialMessage");
+        if (message != null) {
+          print("New Notification");
+          // if (message.data['_id'] != null) {
+          //   Navigator.of(context).push(
+          //     MaterialPageRoute(
+          //       builder: (context) => DemoScreen(
+          //         id: message.data['_id'],
+          //       ),
+          //     ),
+          //   );
+          // }
+        }
+      },
+    );
+
+    // 2. This method only call when App in forground it mean app must be opened
+    FirebaseMessaging.onMessage.listen(
+          (message) {
+        print("FirebaseMessaging.onMessage.listen");
+        if (message.notification != null) {
+          print(message.notification!.title);
+          print(message.notification!.body);
+          print("message.data11 ${message.data}");
+          LocalNotificationService.createanddisplaynotification(message);
+
+        }
+      },
+    );
+
+    // 3. This method only call when App in background and not terminated(not closed)
+    FirebaseMessaging.onMessageOpenedApp.listen(
+          (message) {
+        print("FirebaseMessaging.onMessageOpenedApp.listen");
+        if (message.notification != null) {
+          print(message.notification!.title);
+          print(message.notification!.body);
+          print("message.data22 ${message.data['_id']}");
+        }
+      },
+    );
+  }
+
+  Future<void> _onBackgroundMessage() async {
+    final FirebaseMessaging _fcm = FirebaseMessaging.instance;
+    final token = await _fcm.getToken();
+    deviceTokenToSendPushNotification = token.toString();
+    // print("deviceToken  $deviceTokenToSendPushNotification");
+    // Show a local notification or update the UI
+  }
+  void checkLogin() async{
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    String? val = await pref.getString('login');
+    if (val!= null){
+      Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context)=> Dashboard()), (route) => false);
+    }
+  }
+
   Widget build(BuildContext context) {
+    _onBackgroundMessage();
     return Scaffold(
       // appBar: AppBar(
       //   title: Text('Login'),
@@ -168,18 +250,22 @@ class _MyHomePageState extends State<MyHomePage> {
       // print()
       final data = json.decode(response.body);
       final accessToken = data['access_token'];
-
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('login', accessToken);
+      await prefs.setString('username', username);
+      // await prefs.setString('username', username);
+      print("Login token is: ${accessToken}");
       if (data['success']) {
         // Navigate to home screen
         // ignore: use_build_context_synchronously
         Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => Dashboard(username, accessToken)),
+              builder: (context) => Dashboard()),
         );
       } else {}
 
-      print(accessToken);
+      // print(accessToken);
       return accessToken;
     } else {
       setState(() {

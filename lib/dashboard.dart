@@ -9,26 +9,25 @@ import 'package:uprint/uploadFile.dart';
 import 'userDashboard.dart';
 
 class Dashboard extends StatefulWidget {
-  String username;
-  String accessToken;
   // const Dashboard({Key? key}) : super(key: key);
 
-  Dashboard(this.username, this.accessToken);
+  Dashboard();
   @override
   State<Dashboard> createState() =>
-      _DashboardState(this.username, this.accessToken);
+      _DashboardState();
 }
 
 class _DashboardState extends State<Dashboard> {
-  String username;
-  String accessToken;
+  String accessToken  = "none";
+  String username = "";
+  // String accessToken;
 
   final TextEditingController phoneNumberController = TextEditingController();
   final TextEditingController amountController = TextEditingController();
   final TextEditingController trxIDController = TextEditingController();
   final TextEditingController feedbackController = TextEditingController();
 
-  _DashboardState(this.username, this.accessToken);
+  _DashboardState();
   bool _isLoggedIn = false;
   List<Post> _posts = [];
   int _currentIndex = 0;
@@ -39,8 +38,9 @@ class _DashboardState extends State<Dashboard> {
     // TODO: implement initState
     super.initState();
     _pageController = PageController();
+    getCred();
     _fetchPosts();
-    _checkLoginStatus();
+    // _checkLoginStatus();
   }
 
   @override
@@ -50,13 +50,13 @@ class _DashboardState extends State<Dashboard> {
     super.dispose();
   }
 
-  void _checkLoginStatus() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
-    setState(() {
-      _isLoggedIn = isLoggedIn;
-    });
-  }
+  // void _checkLoginStatus() async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+  //   setState(() {
+  //     _isLoggedIn = isLoggedIn;
+  //   });
+  // }
 
   Future<bool> _logout() async {
     return await showDialog(
@@ -72,7 +72,8 @@ class _DashboardState extends State<Dashboard> {
           TextButton(
             onPressed: () async {
               SharedPreferences prefs = await SharedPreferences.getInstance();
-              prefs.setBool('isLoggedIn', false);
+              // prefs.setBool('isLoggedIn', false);
+              await prefs.clear();
               Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(
@@ -106,6 +107,7 @@ class _DashboardState extends State<Dashboard> {
   // }
 
   Future<void> _fetchPosts() async {
+    await getCred();
     print(username);
     String url = 'https://www.uprintbd.com/mobileUserDashboard';
     // String url = 'http://192.168.0.110:5000/mobileUserDashboard';
@@ -120,7 +122,7 @@ class _DashboardState extends State<Dashboard> {
       setState(() {
         var requests = jsonDecode((response.body));
         _previousRequests = requests[0];
-        print(_previousRequests);
+        // print(_previousRequests);
         if (_previousRequests == []){
           _previousRequests = [{'file_name': "null"},{'cost': 0.0},{"otp_number":"none"}];
         }
@@ -135,10 +137,10 @@ class _DashboardState extends State<Dashboard> {
         }
 
         phone_number = requests[1][0]['phone_number'];
-        print(_previousRequests);
-        print(balance);
-        print(email);
-        print(phone_number);
+        // print(_previousRequests);
+        // print(balance);
+        // print(email);
+        // print(phone_number);
         // _posts = List<Post>.from(jsonData.map((post) => Post.fromJson(post)));
       });
     } else {
@@ -154,6 +156,7 @@ class _DashboardState extends State<Dashboard> {
 
   @override
   Widget build(BuildContext context) {
+    print(accessToken);
     return WillPopScope(
       onWillPop: _logout ,
       child: Scaffold(
@@ -599,6 +602,15 @@ class _DashboardState extends State<Dashboard> {
         },
       );
     }
+  }
+
+  Future<void> getCred() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      accessToken = prefs.getString('login')!;
+      username = prefs.getString('username')!;
+    });
+    print(accessToken);
   }
 
   void submitTransaction() async{
